@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+<title>Earnova | Global Rewards & Micro-Earning Platform</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+theme: {
+extend: {
+colors: {
+obsidian: {
+950: '#050507',
+900: '#0B0B0F',
+850: '#111117',
+800: '#181820',
+700: '#24242F'
+},
+gold: {
+300: '#FCE79C',
+400: '#F5D061',
+500: '#D4AF37',
+600: '#A9831B',
+900: '#2B2209'
+}
+},
+fontFamily: {
+sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif']
+}
+}
+}
+};
+</script>
+<style>
+html { scroll-behavior: smooth; }
+body { background-color: #050507; color: #F8FAFC; -webkit-tap-highlight-color: transparent; }
+.gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #F5D061 50%, #A9831B 100%); }
+.gold-text { background: linear-gradient(135deg, #FCE79C 0%, #D4AF37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.surface-card { background: linear-gradient(180deg, #13131A 0%, #0D0D12 100%); border: 1px solid rgba(212, 175, 55, 0.18); }
+.surface-card-hover { transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
+.surface-card-hover:hover { transform: translateY(-2px); border-color: rgba(245, 208, 97, 0.45); box-shadow: 0 12px 28px -10px rgba(212, 175, 55, 0.18); }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+@media (max-width: 767px) { body { padding-bottom: 76px; } }
+</style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased selection:bg-gold-500 selection:text-obsidian-950">
+
+<!-- Transparency Top Bar -->
+<div class="bg-obsidian-900 border-b border-gold-500/25 text-[11px] sm:text-xs text-slate-300 px-4 py-1.5">
+<div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+<span class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-gold-400 animate-pulse"></span>
+<span><strong class="text-gold-400">Prototype Mode:</strong> Verified cash balance is <strong>$`0.00</strong> until backend, ad network & payment APIs are connected.</span>
+</span>
+<button onclick="App.navigate('settings')" class="text-gold-400 hover:underline font-medium">View Integration Checklist →</button>
+</div>
+</div>
+
+<!-- Top Sticky Header -->
+<header class="sticky top-0 z-40 bg-obsidian-950/90 backdrop-blur-md border-b border-white/10">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+<!-- Brand Logo -->
+<button onclick="App.navigate('dashboard')" class="flex items-center gap-2.5 text-left group focus:outline-none">
+<div class="w-10 h-10 rounded-xl gold-gradient flex items-center justify-center text-obsidian-950 font-black text-xl shadow-lg shadow-gold-500/20 group-hover:scale-105 transition">
+E
+</div>
+<div>
+<span class="block font-extrabold text-lg tracking-tight leading-none text-white">EARN<span class="text-gold-400">OVA</span></span>
+<span class="block text-[10px] tracking-widest uppercase text-slate-400 mt-0.5">Global Rewards</span>
+</div>
+</button>
+
+<!-- Desktop Navigation -->
+<nav id="desktop-nav" class="hidden lg:flex items-center gap-1 text-sm font-medium"></nav>
+
+<!-- Header Right Actions -->
+<div class="flex items-center gap-2 sm:gap-3">
+<!-- Global Currency Selector -->
+<select id="currency-select" onchange="App.setCurrency(this.value)" aria-label="Select display currency"
+class="bg-obsidian-800 text-xs text-slate-200 border border-gold-500/30 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-gold-400">
+<option value="USD">🌐 USD (`$)</option>
+<option value="ETB">🇪🇹 ETB (Br)</option>
+<option value="EUR">🇪🇺 EUR (€)</option>
+<option value="GBP">🇬🇧 GBP (£)</option>
+<option value="KES">🇰🇪 KES (KSh)</option>
+<option value="AED">🇦🇪 AED</option>
+</select>
+
+<!-- Header Balance Pill (when logged in) -->
+<div id="header-balance-slot" class="hidden sm:block"></div>
+
+<!-- Auth Slot -->
+<div id="header-auth-slot"></div>
+
+<!-- Mobile Menu Button -->
+<button onclick="App.toggleMobileMenu()" class="lg:hidden p-2 rounded-lg text-slate-200 hover:bg-obsidian-800" aria-label="Open menu">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+</svg>
+</button>
+</div>
+</div>
+
+<!-- Mobile Slide-down Menu -->
+<div id="mobile-menu" class="hidden lg:hidden bg-obsidian-900 border-t border-white/10 px-4 py-3 space-y-1.5"></div>
+</header>
+
+<!-- Main Content Mount -->
+<main id="app-root" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8"></main>
+
+<!-- Footer -->
+<footer class="bg-obsidian-900 border-t border-white/10 mt-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 text-xs text-slate-400">
+<div>
+<span class="font-extrabold text-white text-sm">EARN<span class="text-gold-400">OVA</span></span>
+<p class="mt-1 max-w-md leading-relaxed">
+Global microtask, gaming, and rewarded-video prototype supporting Commercial Bank of Ethiopia (CBE) & international payout methods.
+</p>
+</div>
+<div class="flex flex-wrap gap-4 text-slate-300">
+<button onclick="App.navigate('dashboard')" class="hover:text-gold-400">Dashboard</button>
+<button onclick="App.navigate('tasks')" class="hover:text-gold-400">Microtasks</button>
+<button onclick="App.navigate('games')" class="hover:text-gold-400">Games</button>
+<button onclick="App.navigate('ads')" class="hover:text-gold-400">Watch Ads</button>
+<button onclick="App.navigate('wallet')" class="hover:text-gold-400">Wallet</button>
+<button onclick="App.navigate('referrals')" class="hover:text-gold-400">Referrals</button>
+<button onclick="App.navigate('settings')" class="hover:text-gold-400">Profile & Settings</button>
+</div>
+</div>
+</footer>
+
+<!-- Mobile Bottom Tab Bar -->
+<nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-obsidian-900/95 backdrop-blur-md border-t border-gold-500/25 grid grid-cols-5 h-16"></nav>
+
+<!-- Modal Root -->
+<div id="modal-root" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"></div>
+
+<!-- Toast Root -->
+<div id="toast-root" class="fixed top-20 right-4 z-50 space-y-2 max-w-sm w-full pointer-events-none"></div>
+
+<script>
+/**
+* ============================================================================
+* EARNOVA — MODULAR FRONTEND ARCHITECTURE
+*
+* BACKEND INTEGRATION POINTS MARKED CLEARLY:
+* 1. Auth: Replace localStorage auth with JWT / OAuth2 / Supabase Auth.
+* 2. Task Verification: Replace handleTaskSubmit() with server-side review API.
+* 3. Games & Offerwalls: Integrate verified SDKs (Unity/Playtime) + server callbacks.
+* 4. Rewarded Ads: Replace AdSimulator with AdMob / AppLovin / Unity Ads S2S webhooks.
+* 5. Payouts (CBE, CBE Birr, PayPal, Wise, USDT): Connect payment gateway + KYC API.
+* ============================================================================
+*/
+
+const CONFIG = {
+KEYS: {
+USERS: 'earnova_users_v1',
+SESSION: 'earnova_session_v1',
+TRANSACTIONS: 'earnova_tx_v1',
+REFERRALS: 'earnova_refs_v1',
+COMPLETED_TASKS: 'earnova_done_tasks_v1'
+},
+CURRENCIES: {
+USD: { code: 'USD', symbol: '$`', rate: 1 },
+ETB: { code: 'ETB', symbol: 'Br ', rate: 124 },
+EUR: { code: 'EUR', symbol: '€', rate: 0.92 },
+GBP: { code: 'GBP', symbol: '£', rate: 0.79 },
+KES: { code: 'KES', symbol: 'KSh ', rate: 129 },
+AED: { code: 'AED', symbol: 'AED ', rate: 3.67 }
+},
+COUNTRIES: ['Ethiopia', 'United States', 'United Kingdom', 'Kenya', 'United Arab Emirates', 'Germany', 'Canada', 'India', 'Nigeria', 'Global / Other'],
+PAYOUT_METHODS: [
+{ id: 'cbe_bank', name: 'Commercial Bank of Ethiopia (CBE)', region: 'Ethiopia (ETB)', minUsd: 5, fieldLabel: 'CBE Account Number (13 digits)', placeholder: '1000XXXXXXXXX', badge: 'Local Favorite 🇪🇹' },
+{ id: 'cbe_birr', name: 'CBE Birr Mobile Wallet', region: 'Ethiopia (ETB)', minUsd: 2, fieldLabel: 'CBE Birr Phone Number', placeholder: '+251 9XX XXX XXX', badge: 'Instant Mobile 🇪🇹' },
+{ id: 'paypal', name: 'PayPal', region: 'International (USD/EUR)', minUsd: 5, fieldLabel: 'PayPal Email Address', placeholder: 'you@example.com', badge: 'Global 🌐' },
+{ id: 'wise', name: 'Wise / International Bank Transfer', region: 'International (Multi-Currency)', minUsd: 10, fieldLabel: 'Wise Email or IBAN', placeholder: 'IBAN / Wise Email', badge: 'Low Fee 🌐' },
+{ id: 'payoneer', name: 'Payoneer', region: 'International', minUsd: 20, fieldLabel: 'Payoneer Account Email', placeholder: 'account@payoneer.com', badge: 'Global 🌐' },
+{ id: 'usdt', name: 'USDT (TRC-20 Crypto)', region: 'Worldwide', minUsd: 10, fieldLabel: 'TRC-20 Wallet Address', placeholder: 'T...', badge: 'Borderless 🌍' }
+ ],
+MICROTASKS: [
+{ id: 't-1', title: 'Evaluate Local Delivery App Usability', category: 'App Feedback', estMinutes: 3, demoRewardUsd: 0.45, instructions: 'Answer 3 short questions about mobile checkout clarity and submit your UX note.' },
+{ id: 't-2', title: 'Verify Business Operating Hours Listing', category: 'Data Verification', estMinutes: 2, demoRewardUsd: 0.30, instructions: 'Confirm sample business formatting and report any missing contact fields.' },
+{ id: 't-3', title: 'Translate 5 Short Retail Phrases (EN ↔ Local)', category: 'Language', estMinutes: 4, demoRewardUsd: 0.65, instructions: 'Provide natural phrasing for 3 sample e-commerce button labels.' },
+{ id: 't-4', title: 'Categorize Product Images (Electronics vs Home)', category: 'AI Data Tagging', estMinutes: 2, demoRewardUsd: 0.25, instructions: 'Select the accurate product tag and explain one visual attribute.' },
+{ id: 't-5', title: 'Global Consumer Survey: Digital Banking', category: 'Surveys', estMinutes: 5, demoRewardUsd: 0.80, instructions: 'Share your preferences on mobile wallets (e.g., CBE Birr, PayPal, Wise).' }
+ ],
+PARTNER_GAMES: [
+{ id: 'g-2', title: 'Crypto Miner Tycoon (Sample Offer)', genre: 'Strategy', milestone: 'Reach Vault Level 5', demoRewardUsd: 1.50, requiresSdk: true },
+{ id: 'g-3', title: 'Global Trivia Masters (Sample Offer)', genre: 'Quiz', milestone: 'Win 3 Daily Matches', demoRewardUsd: 0.90, requiresSdk: true },
+{ id: 'g-4', title: 'Word Atlas Explorer (Sample Offer)', genre: 'Puzzle', milestone: 'Complete 15 Stages', demoRewardUsd: 1.20, requiresSdk: true }
+ ],
+AD_CAMPAIGNS: [
+{ id: 'ad-1', sponsor: 'Sample Partner: Global Cloud Hosting', durationSec: 8, demoRewardUsd: 0.05, title: 'Scale Your App Worldwide with 99.9% Uptime' },
+{ id: 'ad-2', sponsor: 'Sample Partner: Addis Fintech Summit', durationSec: 10, demoRewardUsd: 0.08, title: 'Connecting East African Businesses to Global Payments' },
+{ id: 'ad-3', sponsor: 'Sample Partner: Pro Productivity Suite', durationSec: 6, demoRewardUsd: 0.04, title: 'Smart Invoices & Multi-Currency Tracking' }
+ ]
+};
+
+/**
+* ============================================================================
+* STORE (LOCAL PROTOTYPE PERSISTENCE)
+* ============================================================================
+*/
+function safeJsonParse(raw, fallback) {
+if (!raw) return fallback;
+try {
+const parsed = JSON.parse(raw);
+return parsed === null || parsed === undefined ? fallback : parsed;
+} catch (err) {
+return fallback;
+}
+}
+
+const Store = {
+init() {
+if (!localStorage.getItem(CONFIG.KEYS.USERS)) {
+const demoUser = {
+id: 'u-demo',
+name: 'Abebe Bikila (Demo)',
+email: 'demo@earnova.app',
+password: 'demo123',
+country: 'Ethiopia',
+currency: 'USD',
+referralCode: 'EARN-ABE88',
+preferredMethod: 'cbe_bank',
+payoutAccount: '',
+notifyEmail: true,
+createdAt: new Date().toISOString().slice(0, 10)
+};
+localStorage.setItem(CONFIG.KEYS.USERS, JSON.stringify([demoUser]));
+}
+if (!localStorage.getItem(CONFIG.KEYS.TRANSACTIONS)) {
+localStorage.setItem(CONFIG.KEYS.TRANSACTIONS, JSON.stringify([]));
+}
+if (!localStorage.getItem(CONFIG.KEYS.REFERRALS)) {
+localStorage.setItem(CONFIG.KEYS.REFERRALS, JSON.stringify([]));
+}
+if (!localStorage.getItem(CONFIG.KEYS.COMPLETED_TASKS)) {
+localStorage.setItem(CONFIG.KEYS.COMPLETED_TASKS, JSON.stringify([]));
+}
+},
+getUsers() {
+const list = safeJsonParse(localStorage.getItem(CONFIG.KEYS.USERS), []);
+return Array.isArray(list) ? list : [];
+},
+saveUsers(u) { localStorage.setItem(CONFIG.KEYS.USERS, JSON.stringify(u)); },
+getSession() { return safeJsonParse(localStorage.getItem(CONFIG.KEYS.SESSION), null); },
+setSession(user) {
+if (user) localStorage.setItem(CONFIG.KEYS.SESSION, JSON.stringify(user));
+else localStorage.removeItem(CONFIG.KEYS.SESSION);
+},
+getTransactions(userId) {
+const all = safeJsonParse(localStorage.getItem(CONFIG.KEYS.TRANSACTIONS), []);
+const list = Array.isArray(all) ? all : [];
+return userId ? list.filter(t => t && t.userId === userId) : list;
+},
+addTransaction(tx) {
+const all = this.getTransactions();
+all.unshift(tx);
+localStorage.setItem(CONFIG.KEYS.TRANSACTIONS, JSON.stringify(all));
+},
+getReferrals(userId) {
+const all = safeJsonParse(localStorage.getItem(CONFIG.KEYS.REFERRALS), []);
+const list = Array.isArray(all) ? all : [];
+return userId ? list.filter(r => r && r.referrerId === userId) : list;
+},
+addReferral(ref) {
+const all = this.getReferrals();
+all.unshift(ref);
+localStorage.setItem(CONFIG.KEYS.REFERRALS, JSON.stringify(all));
+},
+getCompletedTasks(userId) {
+const all = safeJsonParse(localStorage.getItem(CONFIG.KEYS.COMPLETED_TASKS), []);
+const list = Array.isArray(all) ? all : [];
+return list.filter(x => x && x.userId === userId).map(x => x.taskId);
+},
+markTaskDone(userId, taskId) {
+const all = safeJsonParse(localStorage.getItem(CONFIG.KEYS.COMPLETED_TASKS), []);
+const list = Array.isArray(all) ? all : [];
+list.push({ userId, taskId });
+localStorage.setItem(CONFIG.KEYS.COMPLETED_TASKS, JSON.stringify(list));
+},
+resetAll() {
+localStorage.removeItem(CONFIG.KEYS.TRANSACTIONS);
+localStorage.removeItem(CONFIG.KEYS.REFERRALS);
+localStorage.removeItem(CONFIG.KEYS.COMPLETED_TASKS);
+this.init();
+}
+};
+
+/**
+* ============================================================================
+* HELPERS & BALANCE CALCULATOR
+* Strictly separates Verified Cash (`$0.00) vs Pending Demo Rewards.
+* All missing or non-finite values safely initialize to 0.
+* ============================================================================
+*/
+function esc(v) {
+if (v === null || v === undefined) return '';
+return String(v).replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"').replace(/'/g, ''');
+}
+
+function safeNumber(val, fallback = 0) {
+const n = Number(val);
+return Number.isFinite(n) ? n : fallback;
+}
+
+function fmtMoney(usd, currencyCode = App.state.currency) {
+const c = CONFIG.CURRENCIES[currencyCode] || CONFIG.CURRENCIES.USD;
+const safeUsd = safeNumber(usd, 0);
+const converted = safeUsd * safeNumber(c.rate, 1);
+const safeConverted = Number.isFinite(converted) ? converted : 0;
+const decimals = safeConverted >= 100 ? 0 : 2;
+return ${c.symbol}${safeConverted.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })};
+}
+
+function getUserBalances(userId) {
+const emptyBalances = {
+verifiedUsd: 0,
+pendingDemoUsd: 0,
+availableDemoUsd: 0,
+totalWithdrawRequestedUsd: 0,
+earnedCount: 0
+};
+if (!userId) return emptyBalances;
+
+const txs = Store.getTransactions(userId);
+let verifiedUsd = 0; // Always $`0.00 in prototype unless backend verifies
+let pendingDemoUsd = 0;
+let totalWithdrawRequestedUsd = 0;
+let earnedCount = 0;
+
+txs.forEach(t => {
+const amt = safeNumber(t && t.amountUsd, 0);
+if (t && t.type === 'withdrawal') {
+totalWithdrawRequestedUsd += Math.abs(amt);
+} else if (t) {
+if (t.status === 'verified') {
+verifiedUsd += amt;
+} else {
+pendingDemoUsd += amt;
+}
+earnedCount += 1;
+}
+});
+
+const availableDemoUsd = Math.max(0, pendingDemoUsd - totalWithdrawRequestedUsd);
+return {
+verifiedUsd: safeNumber(verifiedUsd, 0),
+pendingDemoUsd: safeNumber(pendingDemoUsd, 0),
+availableDemoUsd: safeNumber(availableDemoUsd, 0),
+totalWithdrawRequestedUsd: safeNumber(totalWithdrawRequestedUsd, 0),
+earnedCount: safeNumber(earnedCount, 0)
+};
+}
+
+/**
+* ============================================================================
+* APP CONTROLLER
+* ============================================================================
+*/
+const App = {
+state: {
+route: 'dashboard',
+currency: 'USD',
+taskFilter: 'All',
+walletFilter: 'all',
+selectedWithdrawMethod: 'cbe_bank',
+game: { active: false, score: 0, timeLeft: 15, targetPos: 4, intervalId: null },
+adTimer: { active: false, intervalId: null, remaining: 0, total: 0, ad: null }
+},
+
+init() {
+Store.init();
+const user = Store.getSession();
+if (user) {
+if (user.currency && CONFIG.CURRENCIES[user.currency]) {
+this.state.currency = user.currency;
+}
+if (user.preferredMethod && CONFIG.PAYOUT_METHODS.some(m => m.id === user.preferredMethod)) {
+this.state.selectedWithdrawMethod = user.preferredMethod;
+}
+}
+document.getElementById('currency-select').value = this.state.currency;
+this.renderNavigation();
+this.renderView();
+},
+
+clearActiveTimers() {
+if (this.state.game.intervalId) {
+clearInterval(this.state.game.intervalId);
+this.state.game.intervalId = null;
+this.state.game.active = false;
+}
+if (this.state.adTimer.intervalId) {
+clearInterval(this.state.adTimer.intervalId);
+this.state.adTimer.intervalId = null;
+this.state.adTimer.active = false;
+}
+},
+
+navigate(route) {
+this.clearActiveTimers();
+this.state.route = route;
+document.getElementById('mobile-menu').classList.add('hidden');
+this.renderNavigation();
+this.renderView();
+window.scrollTo({ top: 0, behavior: 'smooth' });
+},
+
+setCurrency(code) {
+const validCode = CONFIG.CURRENCIES[code] ? code : 'USD';
+this.state.currency = validCode;
+const user = Store.getSession();
+if (user) {
+user.currency = validCode;
+Store.setSession(user);
+const users = Store.getUsers().map(u => u.id === user.id ? user : u);
+Store.saveUsers(users);
+}
+this.renderNavigation();
+this.renderView();
+this.toast(Display currency set to${validCode}`, 'info');
+},
+
+toggleMobileMenu() {
+document.getElementById('mobile-menu').classList.toggle('hidden');
+},
+
+toast(msg, type = 'info') {
+const root = document.getElementById('toast-root');
+const styles = {
+success: 'bg-emerald-950/95 border-emerald-400 text-emerald-100',
+warning: 'bg-amber-950/95 border-gold-400 text-amber-100',
+error: 'bg-rose-950/95 border-rose-400 text-rose-100',
+info: 'bg-obsidian-850/95 border-gold-500 text-slate-100'
+};
+const el = document.createElement('div');
+el.className = pointer-events-auto border-l-4 rounded-xl px-4 py-3 shadow-2xl text-xs sm:text-sm flex items-center justify-between gap-3 ${styles[type] || styles.info}; el.innerHTML =<span>${esc(msg)}&lt;/span&gt;&lt;button onclick="this.parentElement.remove()" class="font-bold opacity-75 hover:opacity-100"&gt;&times;&lt;/button>;
+root.appendChild(el);
+setTimeout(() => el.remove(), 4200);
+},
+
+openModal(html) {
+const root = document.getElementById('modal-root');
+root.innerHTML = <div class="surface-card rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden"&gt;${html}</div>`;
+root.classList.remove('hidden');
+},
+
+closeModal() {
+this.clearActiveTimers();
+const root = document.getElementById('modal-root');
+root.classList.add('hidden');
+root.innerHTML = '';
+},
+
+/**
+* NAVIGATION
+*/
+renderNavigation() {
+const user = Store.getSession();
+const bal = getUserBalances(user?.id);
+const navItems = [
+{ id: 'dashboard', label: 'Dashboard', icon: '🏠' },
+{ id: 'tasks', label: 'Microtasks', icon: '✅' },
+{ id: 'games', label: 'Games', icon: '🎮' },
+{ id: 'ads', label: 'Watch Ads', icon: '📺' },
+{ id: 'wallet', label: 'Wallet', icon: '💳' },
+{ id: 'referrals', label: 'Referrals', icon: '🤝' },
+{ id: 'settings', label: 'Profile', icon: '⚙️' }
+ ];
+
+document.getElementById('desktop-nav').innerHTML = navItems.map(i => &lt;button onclick="App.navigate('${i.id}')"
+class="px-3 py-2 rounded-lg transition {i.label}
+</button>
+`).join('');
+
+document.getElementById('mobile-menu').innerHTML = navItems.map(i => &lt;button onclick="App.navigate('${i.id}')"
+class="w-full text-left px-3 py-2.5 rounded-lg text-sm flex items-center gap-2 ${this.state.route === i.id ? 'bg-gold-500/15 text-gold-400 font-semibold' : 'text-slate-200'}"&gt; &lt;span&gt;${i.icon}</span><span>${i.label}&lt;/span&gt; &lt;/button&gt;).join('');
+
+const balSlot = document.getElementById('header-balance-slot');
+if (user) {
+balSlot.innerHTML = &lt;button onclick="App.navigate('wallet')" class="bg-obsidian-800 border border-gold-500/30 rounded-lg px-3 py-1.5 text-xs flex items-center gap-2 hover:border-gold-400"&gt; &lt;span class="text-slate-400"&gt;Verified:&lt;/span&gt; &lt;span class="font-bold text-white"&gt;${fmtMoney(bal.verifiedUsd)}</span>
+<span class="text-slate-600">|</span>
+<span class="text-gold-400 font-semibold" title="Pending Backend Verification">${fmtMoney(bal.availableDemoUsd)} Demo&lt;/span&gt; &lt;/button&gt;;
+} else {
+balSlot.innerHTML = '';
+}
+
+const authSlot = document.getElementById('header-auth-slot');
+if (user) {
+const initial = (user.name && user.name[0]) ? user.name[0].toUpperCase() : 'U';
+authSlot.innerHTML = &lt;div class="flex items-center gap-2"&gt; &lt;button onclick="App.navigate('settings')" class="w-9 h-9 rounded-full gold-gradient text-obsidian-950 font-extrabold text-sm flex items-center justify-center shadow" title="${esc(user.name)}">
+${esc(initial)} &lt;/button&gt; &lt;button onclick="App.logout()" class="hidden sm:inline text-xs text-slate-400 hover:text-gold-400"&gt;Logout&lt;/button&gt; &lt;/div&gt;;
+} else {
+authSlot.innerHTML = &lt;button onclick="App.openAuthModal('login')" class="gold-gradient text-obsidian-950 font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow"&gt; Sign In &lt;/button&gt;;
+}
+
+const bottomTabs = [
+{ id: 'dashboard', label: 'Home', icon: '🏠' },
+{ id: 'tasks', label: 'Tasks', icon: '✅' },
+{ id: 'games', label: 'Games', icon: '🎮' },
+{ id: 'ads', label: 'Ads', icon: '📺' },
+{ id: 'wallet', label: 'Wallet', icon: '💳' }
+ ];
+document.getElementById('mobile-bottom-nav').innerHTML = bottomTabs.map(t => &lt;button onclick="App.navigate('${t.id}')"
+class="flex flex-col items-center justify-center gap-0.5 text-[11px] ${this.state.route === t.id ? 'text-gold-400 font-bold' : 'text-slate-400'}"&gt; &lt;span class="text-lg leading-none"&gt;${t.icon}</span>
+<span>${t.label}&lt;/span&gt; &lt;/button&gt;).join('');
+},
+
+/**
+* AUTHENTICATION
+*/
+openAuthModal(mode = 'login') {
+const isLogin = mode === 'login';
+this.openModal(&lt;div class="p-6 border-b border-white/10 flex items-center justify-between bg-obsidian-900"&gt; &lt;div&gt; &lt;h3 class="text-xl font-extrabold text-white"&gt;${isLogin ? 'Sign In to Earnova' : 'Create Earnova Account'}</h3>
+<p class="text-xs text-slate-400 mt-0.5">Local prototype auth — requires server auth in production</p>
+</div>
+<button onclick="App.closeModal()" class="text-slate-400 hover:text-white text-2xl leading-none">×</button>
+</div>
+<div class="p-6 space-y-4">
+${isLogin ?
+<div class="bg-gold-900/40 border border-gold-500/40 rounded-xl p-3.5 flex items-center justify-between gap-3">
+<div>
+<p class="text-xs font-bold text-gold-300">Quick Prototype Testing</p>
+<p class="text-[11px] text-slate-300">Sign in instantly with the demo account (Ethiopia / CBE ready)</p>
+</div>
+<button onclick="App.demoLogin()" class="gold-gradient text-obsidian-950 font-bold text-xs px-3.5 py-2 rounded-lg shrink-0">Demo Login</button>
+</div>
+<form onsubmit="App.handleLogin(event)" class="space-y-3">
+<div>
+<label class="block text-xs font-semibold text-slate-300 mb-1">Email</label>
+<input id="login-email" type="email" required placeholder="you@example.com" class="w-full bg-obsidian-900 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-gold-400" />
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+<input id="login-pass" type="password" required placeholder="••••••••" class="w-full bg-obsidian-900 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-gold-400" />
+</div>
+<button type="submit" class="w-full gold-gradient text-obsidian-950 font-bold py-2.5 rounded-xl text-sm">Sign In</button>
+</form>
+<p class="text-center text-xs text-slate-400">New here? <button onclick="App.openAuthModal('register')" class="text-gold-400 font-bold underline">Create an account</button></p>
+:
+<form onsubmit="App.handleRegister(event)" class="space-y-3">
+<div>
+<label class="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
+<input id="reg-name" type="text" required placeholder="Your full name" class="w-full bg-obsidian-900 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white" />
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div>
+<label class="block text-xs font-semibold text-slate-300 mb-1">Country</label>
+<select id="reg-country" class="w-full bg-obsidian-900 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white">
+latex
+{CONFIG.COUNTRIES.map(c =&gt; `<option value="
+
+{esc(c)}">${esc(c)}&lt;/option>).join('')}
+</select>
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-300 mb-1">Referral Code (Optional)</label>
+<input id="reg-ref" type="text" placeholder="EARN-..." class="w-full bg-obsidian-900 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white uppercase" />
+</div>
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-300 mb-1">Email</label>
+<input id="reg-email" type="email" required placeholder="you@example.com" class="w-full bg-obsidian-900 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white" />
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+<input id="reg-pass" type="password" required minlength="4" placeholder="Min 4 characters" class="w-full bg-obsidian-900 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white" />
+</div>
+<button type="submit" class="w-full gold-gradient text-obsidian-950 font-bold py-2.5 rounded-xl text-sm">Register Account</button>
+</form>
+<p class="text-center text-xs text-slate-400">Already have an account? <button onclick="App.openAuthModal('login')" class="text-gold-400 font-bold underline">Sign in</button></p>
+} &lt;/div&gt;);
+},
+
+syncSessionPreferences(user) {
+if (!user) return;
+const curr = CONFIG.CURRENCIES[user.currency] ? user.currency : 'USD';
+this.state.currency = curr;
+document.getElementById('currency-select').value = curr;
+if (user.preferredMethod && CONFIG.PAYOUT_METHODS.some(m => m.id === user.preferredMethod)) {
+this.state.selectedWithdrawMethod = user.preferredMethod;
+}
+},
+
+demoLogin() {
+const user = Store.getUsers().find(u => u.email === 'demo@earnova.app');
+if (!user) return;
+Store.setSession(user);
+this.syncSessionPreferences(user);
+this.closeModal();
+this.toast(Signed in as${user.name}`, 'success');
+this.renderNavigation();
+this.renderView();
+},
+
+handleLogin(e) {
+e.preventDefault();
+const email = document.getElementById('login-email').value.trim().toLowerCase();
+const pass = document.getElementById('login-pass').value;
+const user = Store.getUsers().find(u => u.email.toLowerCase() === email && u.password === pass);
+if (!user) {
+this.toast('Invalid email or password. Try Demo Login.', 'error');
+return;
+}
+Store.setSession(user);
+this.syncSessionPreferences(user);
+this.closeModal();
+this.toast(Welcome back, ${user.name}!`, 'success');
+this.renderNavigation();
+this.renderView();
+},
+
+handleRegister(e) {
+e.preventDefault();
+const name = document.getElementById('reg-name').value.trim();
+const country = document.getElementById('reg-country').value;
+const email = document.getElementById('reg-email').value.trim().toLowerCase();
+const password = document.getElementById('reg-pass').value;
+const refInput = document.getElementById('reg-ref').value.trim().toUpperCase();
+const users = Store.getUsers();
+if (users.some(u => u.email.toLowerCase() === email)) {
+this.toast('Email already registered.', 'warning');
+return;
+}
+const newUser = {
+id: 'u-' + Date.now(),
+name,
+email,
+password,
+country,
+currency: country === 'Ethiopia' ? 'ETB' : 'USD',
+referralCode: 'EARN-' + Math.random().toString(36).substring(2, 7).toUpperCase(),
+preferredMethod: country === 'Ethiopia' ? 'cbe_bank' : 'paypal',
+payoutAccount: '',
+notifyEmail: true,
+createdAt: new Date().toISOString().slice(0, 10)
+};
+Store.saveUsers([...users, newUser]);
+
+if (refInput) {
+const referrer = users.find(u => u.referralCode === refInput);
+if (referrer) {
+Store.addReferral({
+id: 'ref-' + Date.now(),
+referrerId: referrer.id,
+friendName: name,
+status: 'Pending Verification (Demo)',
+createdAt: new Date().toISOString().slice(0, 10)
+});
+Store.addTransaction({
+id: 'tx-' + Date.now(),
+userId: referrer.id,
+type: 'referral',
+title: Referral Bonus:${name}`,
+amountUsd: 1.00,
+status: 'pending_verification',
+note: 'Requires backend anti-fraud & activity verification',
+createdAt: new Date().toLocaleString()
+});
+}
+}
+
+Store.setSession(newUser);
+this.syncSessionPreferences(newUser);
+this.closeModal();
+this.toast(Account created! Welcome to Earnova, ${name}.`, 'success');
+this.renderNavigation();
+this.renderView();
+},
+
+logout() {
+Store.setSession(null);
+this.toast('Signed out.', 'info');
+this.navigate('dashboard');
+},
+
+requireAuthGate(featureTitle) {
+return &lt;div class="surface-card rounded-3xl p-8 sm:p-12 text-center max-w-xl mx-auto my-8"&gt; &lt;div class="w-16 h-16 rounded-2xl gold-gradient text-obsidian-950 font-black text-3xl flex items-center justify-center mx-auto mb-4 shadow-lg"&gt;E&lt;/div&gt; &lt;h2 class="text-2xl font-extrabold text-white"&gt;${esc(featureTitle)}</h2>
+<p class="text-sm text-slate-400 mt-2 leading-relaxed">
+Sign in or create a free Earnova account to track your simulated rewards, test microtasks, play games, and preview CBE & international withdrawals.
+</p>
+<div class="mt-6 flex flex-wrap justify-center gap-3">
+<button onclick="App.demoLogin()" class="gold-gradient text-obsidian-950 font-bold px-6 py-3 rounded-xl text-sm shadow">1-Click Demo Login</button>
+<button onclick="App.openAuthModal('register')" class="bg-obsidian-800 hover:bg-obsidian-700 border border-gold-500/30 text-white font-semibold px-6 py-3 rounded-xl text-sm">Create Account</button>
+</div>
+</div>
+`;
+},
+
+/**
+* MAIN ROUTER
+*/
+renderView() {
+const root = document.getElementById('app-root');
+const routes = {
+dashboard: () => this.views.dashboard(),
+tasks: () => this.views.tasks(),
+games: () => this.views.games(),
+ads: () => this.views.ads(),
+wallet: () => this.views.wallet(),
+referrals: () => this.views.referrals(),
+settings: () => this.views.settings()
+};
+root.innerHTML = (routes[this.state.route] || routes.dashboard)();
+},
+
+/**
+* ALL APPLICATION VIEWS
+*/
+views: {
+dashboard() {
+const user = Store.getSession();
+const bal = getUserBalances(user?.id);
+const recentTx = user ? Store.getTransactions(user.id).slice(0, 5) : [];
+
+return &lt;div class="space-y-8"&gt; &lt;!-- Hero / Balance Overview Banner --&gt; &lt;section class="surface-card rounded-3xl p-6 sm:p-8 relative overflow-hidden"&gt; &lt;div class="absolute -right-20 -top-20 w-72 h-72 bg-gold-500/10 rounded-full blur-3xl pointer-events-none"&gt;&lt;/div&gt; &lt;div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative"&gt; &lt;div&gt; &lt;span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-gold-400 bg-gold-500/10 border border-gold-500/30 px-3 py-1 rounded-full"&gt; 🌍 Global Earning Hub • ${esc(user ? user.country : 'International')}
+</span>
+<h1 class="text-2xl sm:text-4xl font-extrabold text-white mt-3">
+${user ?Welcome, <span class="gold-text">latex
+{esc(user.name.split(' ')[0])}&lt;/span>` : `Turn Spare Time Into &lt;span class="gold-text"&gt;Global Rewards&lt;/span>`} &lt;/h1&gt; &lt;p class="text-sm text-slate-300 mt-2 max-w-xl"&gt; Complete microtasks, play mini-games, and watch partner ads. Supports Commercial Bank of Ethiopia (CBE), CBE Birr, PayPal, Wise & USDT. &lt;/p&gt; 
+
+{!user ? &lt;div class="mt-5 flex flex-wrap gap-3"&gt; &lt;button onclick="App.demoLogin()" class="gold-gradient text-obsidian-950 font-bold px-5 py-2.5 rounded-xl text-sm shadow"&gt;Try Demo Account&lt;/button&gt; &lt;button onclick="App.openAuthModal('register')" class="bg-obsidian-800 hover:bg-obsidian-700 border border-white/15 text-white font-semibold px-5 py-2.5 rounded-xl text-sm"&gt;Register Free&lt;/button&gt; &lt;/div&gt; : ''}
+</div>
+
+<!-- Clear Balance Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 lg:w-[440px] shrink-0">
+<div class="bg-obsidian-950/90 border border-white/15 rounded-2xl p-4">
+<div class="flex items-center justify-between">
+<span class="text-xs text-slate-400">Available Verified Balance</span>
+<span class="text-[10px] bg-white/10 text-slate-300 px-2 py-0.5 rounded-full">Server Verified</span>
+</div>
+<p class="text-2xl sm:text-3xl font-black text-white mt-1.5">{fmtMoney(bal.availableDemoUsd)}</p>
+<p class="text-[11px] text-slate-400 mt-1">Total logged: {bal.earnedCount} actions)</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- 4 Core Earning & Wallet Action Cards -->
+<section>
+<h2 class="text-lg font-extrabold text-white mb-4">Ways to Earn & Manage Rewards</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<button onclick="App.navigate('tasks')" class="surface-card surface-card-hover rounded-2xl p-5 text-left flex flex-col justify-between">
+<div>
+<div class="w-11 h-11 rounded-xl bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-2xl mb-3">✅</div>
+<h3 class="font-bold text-white text-base">Microtasks</h3>
+<p class="text-xs text-slate-400 mt-1">Surveys, data verification & quick feedback tasks.</p>
+</div>
+<span class="text-xs font-bold text-gold-400 mt-4 inline-block">Browse $`{CONFIG.MICROTASKS.length} Tasks →</span>
+</button>
+
+<button onclick="App.navigate('games')" class="surface-card surface-card-hover rounded-2xl p-5 text-left flex flex-col justify-between">
+<div>
+<div class="w-11 h-11 rounded-xl bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-2xl mb-3">🎮</div>
+<h3 class="font-bold text-white text-base">Play Games</h3>
+<p class="text-xs text-slate-400 mt-1">Play Gold Vault Reflex right here + partner offers.</p>
+</div>
+<span class="text-xs font-bold text-gold-400 mt-4 inline-block">Play Now →</span>
+</button>
+
+<button onclick="App.navigate('ads')" class="surface-card surface-card-hover rounded-2xl p-5 text-left flex flex-col justify-between">
+<div>
+<div class="w-11 h-11 rounded-xl bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-2xl mb-3">📺</div>
+<h3 class="font-bold text-white text-base">Watch Ads</h3>
+<p class="text-xs text-slate-400 mt-1">Short sponsored clips with verified view timers.</p>
+</div>
+<span class="text-xs font-bold text-gold-400 mt-4 inline-block">Watch & Earn →</span>
+</button>
+
+<button onclick="App.navigate('wallet')" class="surface-card surface-card-hover rounded-2xl p-5 text-left flex flex-col justify-between">
+<div>
+<div class="w-11 h-11 rounded-xl bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-2xl mb-3">💳</div>
+<h3 class="font-bold text-white text-base">Wallet & Withdraw</h3>
+<p class="text-xs text-slate-400 mt-1">CBE, CBE Birr, PayPal, Wise, Payoneer & USDT.</p>
+</div>
+<span class="text-xs font-bold text-gold-400 mt-4 inline-block">Open Wallet →</span>
+</button>
+</div>
+</section>
+
+<!-- Recent Activity + CBE / Global Support Strip -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 surface-card rounded-2xl p-6">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-lg font-extrabold text-white">Recent Activity Ledger</h2>
+<button onclick="App.navigate('wallet')" class="text-xs text-gold-400 hover:underline font-semibold">View Full History</button>
+</div>
+${!user ?
+<p class="text-sm text-slate-400 py-6 text-center">Sign in to view your personal task, game, ad, and withdrawal history.</p>
+: recentTx.length === 0 ?
+<div class="text-center py-8 border border-dashed border-white/10 rounded-xl">
+<p class="text-sm text-slate-300 font-medium">No activity recorded yet.</p>
+<p class="text-xs text-slate-500 mt-1">Complete a microtask, play Gold Vault Reflex, or watch a simulated ad to see entries appear here.</p>
+</div>
+:
+<div class="space-y-2.5">
+${recentTx.map(tx =&gt; App.renderTxRow(tx)).join('')} &lt;/div&gt;}
+</div>
+
+<div class="surface-card rounded-2xl p-6 flex flex-col justify-between space-y-4">
+<div>
+<span class="text-[11px] font-bold uppercase tracking-wider text-gold-400">Local & Global Payouts</span>
+<h3 class="text-lg font-extrabold text-white mt-1">Supported Withdrawal Rails</h3>
+<p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+Designed for Ethiopian and international earners with multi-currency estimation.
+</p>
+<ul class="mt-4 space-y-2 text-xs text-slate-200">
+<li class="flex items-center justify-between bg-obsidian-950 px-3 py-2 rounded-lg border border-white/10">
+<span>🇪🇹 Commercial Bank of Ethiopia (CBE)</span><span class="text-gold-400 font-semibold">ETB</span>
+</li>
+<li class="flex items-center justify-between bg-obsidian-950 px-3 py-2 rounded-lg border border-white/10">
+<span>📱 CBE Birr Wallet</span><span class="text-gold-400 font-semibold">ETB</span>
+</li>
+<li class="flex items-center justify-between bg-obsidian-950 px-3 py-2 rounded-lg border border-white/10">
+<span>🌐 PayPal / Wise / Payoneer</span><span class="text-slate-400">USD / EUR</span>
+</li>
+<li class="flex items-center justify-between bg-obsidian-950 px-3 py-2 rounded-lg border border-white/10">
+<span>🪙 USDT (TRC-20)</span><span class="text-slate-400">Global</span>
+</li>
+</ul>
+</div>
+<button onclick="App.navigate('referrals')" class="w-full bg-obsidian-800 hover:bg-obsidian-700 border border-gold-500/30 text-gold-300 font-semibold py-2.5 rounded-xl text-xs">
+Invite Friends & Track Referrals →
+</button>
+</div>
+</section>
+</div>
+`;
+},
+
+tasks() {
+const user = Store.getSession();
+if (!user) return App.requireAuthGate('Microtasks Marketplace');
+const doneIds = Store.getCompletedTasks(user.id);
+const categories = ['All', ...new Set(CONFIG.MICROTASKS.map(t => t.category))];
+const filtered = App.state.taskFilter === 'All'
+? CONFIG.MICROTASKS
+: CONFIG.MICROTASKS.filter(t => t.category === App.state.taskFilter);
+
+return &lt;div class="space-y-6"&gt; &lt;div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4"&gt; &lt;div&gt; &lt;span class="text-xs font-bold uppercase tracking-widest text-gold-400"&gt;Microtasks&lt;/span&gt; &lt;h1 class="text-2xl sm:text-3xl font-extrabold text-white mt-1"&gt;Complete Tasks for Demo Rewards&lt;/h1&gt; &lt;p class="text-xs sm:text-sm text-slate-400 mt-1"&gt;Submissions enter &lt;strong class="text-gold-300"&gt;Pending Verification&lt;/strong&gt;. Real payouts require backend moderation.&lt;/p&gt; &lt;/div&gt; &lt;div class="flex flex-wrap gap-1.5"&gt;${categories.map(c => &lt;button onclick="App.setTaskFilter('${esc(c)}')"
+class="px-3 py-1.5 rounded-lg text-xs font-semibold ${App.state.taskFilter === c ? 'gold-gradient text-obsidian-950' : 'bg-obsidian-800 text-slate-300 border border-white/10'}"&gt; ${esc(c)}
+</button>
+`).join('')}
+</div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+${filtered.map(t =&gt; { const isDone = doneIds.includes(t.id); return
+<div class="surface-card rounded-2xl p-5 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between gap-2">
+<span class="text-[11px] font-semibold text-gold-400 bg-gold-500/10 border border-gold-500/25 px-2.5 py-0.5 rounded-full">{t.estMinutes} min</span>
+</div>
+<h3 class="font-bold text-white text-lg mt-3 leading-snug">{esc(t.instructions)}</p>
+</div>
+<div class="mt-5 pt-4 border-t border-white/10 flex items-center justify-between">
+<div>
+<span class="text-[10px] uppercase text-slate-500 block">Demo Estimate</span>
+<span class="text-base font-extrabold gold-text">+{isDone ? &lt;span class="text-xs font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-3 py-2 rounded-xl"&gt;Pending Review&lt;/span&gt; : &lt;button onclick="App.openTaskModal('${t.id}')" class="gold-gradient text-obsidian-950 font-bold text-xs px-4 py-2.5 rounded-xl shadow">Start Task</button>
+} &lt;/div&gt; &lt;/div&gt;;
+}).join('')}
+</div>
+</div>
+`;
+},
+
+games() {
+const user = Store.getSession();
+if (!user) return App.requireAuthGate('Play & Earn Games');
+const g = App.state.game;
+
+return `
+<div class="space-y-8">
+<div>
+<span class="text-xs font-bold uppercase tracking-widest text-gold-400">Play & Earn Arcade</span>
+<h1 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">Earn Rewards Playing Games</h1>
+<p class="text-xs sm:text-sm text-slate-400 mt-1">Play our built-in reflex game below or preview partner offerwall milestones (requires third-party Game SDK for real cash).</p>
+</div>
+
+<!-- Built-in Playable Mini-Game -->
+<section class="surface-card rounded-3xl p-6 sm:p-8 border border-gold-500/40">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+<div class="lg:col-span-5 space-y-4">
+<span class="text-[11px] font-bold uppercase bg-gold-500/20 text-gold-300 px-3 py-1 rounded-full">Interactive Mini-Game</span>
+<h2 class="text-2xl font-extrabold text-white">Gold Vault Reflex</h2>
+<p class="text-sm text-slate-300 leading-relaxed">
+Tap the glowing gold coin as many times as you can within <strong>15 seconds</strong>. Score 8+ hits to log a <span class="text-gold-400 font-semibold">${fmtMoney(0.20)}&lt;/span&gt; Pending Verification demo reward! &lt;/p&gt; &lt;div class="grid grid-cols-2 gap-3"&gt; &lt;div class="bg-obsidian-950 border border-white/10 rounded-xl p-3"&gt; &lt;span class="text-xs text-slate-400"&gt;Score&lt;/span&gt; &lt;p id="game-score" class="text-2xl font-black gold-text"&gt;${safeNumber(g.score, 0)}</p>
+</div>
+<div class="bg-obsidian-950 border border-white/10 rounded-xl p-3">
+<span class="text-xs text-slate-400">Time Left</span>
+<p id="game-timer" class="text-2xl font-black text-white">${safeNumber(g.timeLeft, 15)}s&lt;/p&gt; &lt;/div&gt; &lt;/div&gt; &lt;button onclick="App.startMiniGame()" class="w-full gold-gradient text-obsidian-950 font-extrabold py-3 rounded-xl text-sm shadow"&gt; ${g.active ? 'Restart Game' : 'Start 15s Challenge'}
+</button>
+</div>
+
+<div class="lg:col-span-7">
+<div id="game-board" class="grid grid-cols-3 gap-3 max-w-md mx-auto bg-obsidian-950 p-4 rounded-2xl border border-gold-500/25">
+${Array.from({ length: 9 }).map((_, idx) =&gt;
+<button onclick="App.hitGameTile({g.active && g.targetPos === idx ? 'gold-gradient text-obsidian-950 border-gold-300 scale-105 shadow-lg shadow-gold-500/30' : 'bg-obsidian-850 border-white/10 text-slate-700'}">
+${g.active && g.targetPos === idx ? '🪙' : '•'} &lt;/button&gt;).join('')}
+</div>
+</div>
+</div>
+</section>
+
+<!-- Partner Game Offerwall Preview -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-lg font-extrabold text-white">Partner Game Offerwalls (Integration Preview)</h2>
+<span class="text-[11px] text-slate-400 border border-white/15 px-2.5 py-1 rounded-full">Requires Offerwall SDK</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+${CONFIG.PARTNER_GAMES.map(pg =&gt;
+<div class="surface-card rounded-2xl p-5 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-center text-xs">
+<span class="text-gold-400 font-semibold">{esc(pg.title)}</h3>
+<p class="text-xs text-slate-400 mt-1">Goal: {fmtMoney(pg.demoRewardUsd)}</span>
+<button onclick="App.toast('Partner game offers require integrating a verified Offerwall SDK (e.g., Tapjoy, Adjoe, or ironSource).', 'info')"
+class="bg-obsidian-800 hover:bg-obsidian-700 border border-white/15 text-xs text-white font-semibold px-3.5 py-2 rounded-xl">
+SDK Info
+</button>
+</div>
+</div>
+).join('')} &lt;/div&gt; &lt;/section&gt; &lt;/div&gt;;
+},
+
+ads() {
+const user = Store.getSession();
+if (!user) return App.requireAuthGate('Watch Ads & Earn');
+
+return `
+<div class="space-y-6">
+<div>
+<span class="text-xs font-bold uppercase tracking-widest text-gold-400">Rewarded Video Portal</span>
+<h1 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">Watch Sponsored Ads</h1>
+<p class="text-xs sm:text-sm text-slate-400 mt-1">
+Simulated ad player. Production deployment requires a real ad network SDK (AdMob, Unity Ads, AppLovin) with Server-to-Server (S2S) verification callbacks.
+</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+latex
+{CONFIG.AD_CAMPAIGNS.map(ad =&gt; ` &lt;div class="surface-card rounded-2xl p-5 flex flex-col justify-between"&gt; &lt;div&gt; &lt;div class="h-32 rounded-xl bg-obsidian-950 border border-white/10 flex flex-col items-center justify-center p-4 text-center mb-4"&gt; &lt;span class="text-3xl mb-1.5"&gt;🎬&lt;/span&gt; &lt;span class="text-[11px] text-gold-400 font-semibold"&gt;
+
+{ad.durationSec}s Sponsored Clip</span>
+</div>
+<span class="text-[11px] text-slate-400">{esc(ad.title)}</h3>
+</div>
+<div class="mt-5 pt-4 border-t border-white/10 flex items-center justify-between">
+<div>
+<span class="text-[10px] text-slate-500 block">Demo Credit</span>
+<span class="font-extrabold gold-text">+{ad.id}')" class="gold-gradient text-obsidian-950 font-bold text-xs px-4 py-2.5 rounded-xl shadow">
+▶ Watch Ad
+</button>
+</div>
+</div>
+).join('')} &lt;/div&gt; &lt;/div&gt;;
+},
+
+wallet() {
+const user = Store.getSession();
+if (!user) return App.requireAuthGate('Wallet & Withdrawals');
+const bal = getUserBalances(user.id);
+const txs = Store.getTransactions(user.id);
+const filteredTxs = App.state.walletFilter === 'all' ? txs : txs.filter(t => t.type === App.state.walletFilter);
+const selectedMethod = CONFIG.PAYOUT_METHODS.find(m => m.id === App.state.selectedWithdrawMethod) || CONFIG.PAYOUT_METHODS[0];
+
+return `
+<div class="space-y-8">
+<div>
+<span class="text-xs font-bold uppercase tracking-widest text-gold-400">Wallet & Payouts</span>
+<h1 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">Balance & Withdrawal Center</h1>
+</div>
+
+<!-- Balance Breakdown Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+<div class="surface-card rounded-2xl p-5">
+<span class="text-xs text-slate-400">Verified Cash Balance</span>
+<p class="text-3xl font-black text-white mt-1">{fmtMoney(bal.availableDemoUsd)}</p>
+<span class="text-[11px] text-slate-400 mt-1 block">Earned in prototype testing</span>
+</div>
+<div class="surface-card rounded-2xl p-5">
+<span class="text-xs text-slate-400">Requested Withdrawals</span>
+<p class="text-3xl font-black text-amber-300 mt-1">$`{fmtMoney(bal.totalWithdrawRequestedUsd)}</p>
+<span class="text-[11px] text-slate-500 mt-1 block">Pending review (no real payout)</span>
+</div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Withdrawal Request Form -->
+<div class="lg:col-span-5 surface-card rounded-2xl p-6 space-y-4 h-fit">
+<div>
+<h2 class="text-lg font-extrabold text-white">Request Withdrawal</h2>
+<p class="text-xs text-slate-400 mt-1">Select Commercial Bank of Ethiopia (CBE), CBE Birr, or an international payout rail.</p>
+</div>
+
+<div class="bg-amber-950/50 border border-gold-500/40 rounded-xl p-3 text-[11px] text-amber-200 leading-relaxed">
+<strong>No Real Money Disbursed:</strong> Submitting this form logs a <em>Pending Verification (Prototype)</em> request. Live transfers require backend verification and payment gateway APIs.
+</div>
+
+<form onsubmit="App.handleWithdraw(event)" class="space-y-3.5">
+<div>
+<label class="block text-xs font-semibold text-slate-300 mb-1">Payout Method</label>
+<select id="wd-method" onchange="App.selectWithdrawMethod(this.value)"
+class="w-full bg-obsidian-900 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white">
+${CONFIG.PAYOUT_METHODS.map(m =&gt;
+<option value="{selectedMethod.id === m.id ? 'selected' : ''}>
+{fmtMoney(m.minUsd)}
+</option>
+).join('')} &lt;/select&gt; &lt;div class="mt-1.5 flex items-center justify-between text-[11px]"&gt; &lt;span class="text-gold-400 font-semibold"&gt;${esc(selectedMethod.badge)}</span>
+<span class="text-slate-400">Region: `${esc(selectedMethod.region)}</span>
+</div>
+</div>
+
+<div>
+<label class="block text-xs font-semibold text-slate-300 mb-1">{esc(user.payoutAccount || '')}" placeholder="$`{esc(selectedMethod.placeholder)}"
+class="w-full bg-obsidian-900 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white" />
+</div>
+
+<div>
+<label class="block text-xs font-semibold text-slate-300 mb-1">Amount (USD equivalent — Demo Balance: `${fmtMoney(bal.availableDemoUsd, 'USD')})</label>
+<input id="wd-amount" type="number" step="0.01" min="0.10" required placeholder="e.g., 5.00"
+class="w-full bg-obsidian-900 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white" />
+</div>
+
+<button type="submit" class="w-full gold-gradient text-obsidian-950 font-extrabold py-3 rounded-xl text-sm shadow">
+Submit Withdrawal Request (Prototype)
+</button>
+</form>
+</div>
+
+<!-- Transaction History -->
+<div class="lg:col-span-7 surface-card rounded-2xl p-6 space-y-4">
+<div class="flex flex-wrap items-center justify-between gap-3">
+<h2 class="text-lg font-extrabold text-white">Transaction History</h2>
+<div class="flex flex-wrap gap-1.5">
+latex
+{['all', 'task', 'game', 'ad', 'referral', 'withdrawal'].map(f =&gt; ` &lt;button onclick="App.setWalletFilter('
+
+{f}')"
+class="px-2.5 py-1 rounded-lg text-[11px] font-semibold capitalize {f}
+</button>
+`).join('')}
+</div>
+</div>
+
+latex
+{filteredTxs.length === 0 ? ` &lt;div class="text-center py-12 border border-dashed border-white/10 rounded-xl text-sm text-slate-400"&gt; No transactions in this category yet. &lt;/div&gt; ` : ` &lt;div class="space-y-2.5 max-h-[520px] overflow-y-auto pr-1"&gt; 
+
+{filteredTxs.map(tx => App.renderTxRow(tx)).join('')}
+</div>
+} &lt;/div&gt; &lt;/div&gt; &lt;/div&gt;;
+},
+
+referrals() {
+const user = Store.getSession();
+if (!user) return App.requireAuthGate('Referral Program');
+const refs = Store.getReferrals(user.id);
+const shareUrl = ${window.location.href.split('#')[0]}?ref=${user.referralCode};
+
+return `
+<div class="space-y-8">
+<div>
+<span class="text-xs font-bold uppercase tracking-widest text-gold-400">Invite & Grow</span>
+<h1 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">Referral Program</h1>
+<p class="text-xs sm:text-sm text-slate-400 mt-1">Share your unique code. Referral bonuses remain Pending Verification until anti-fraud checks run on a backend server.</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="surface-card rounded-2xl p-6 space-y-4">
+<h2 class="text-lg font-extrabold text-white">Your Referral Code & Link</h2>
+<div class="bg-obsidian-950 border border-gold-500/40 rounded-xl p-4 flex items-center justify-between gap-3">
+<div>
+<span class="text-[11px] text-slate-400 block">Unique Invite Code</span>
+<span class="text-2xl font-black tracking-wider gold-text">{esc(user.referralCode)}', 'Referral code copied!')" class="gold-gradient text-obsidian-950 font-bold text-xs px-4 py-2 rounded-lg">Copy Code</button>
+</div>
+<div class="bg-obsidian-950 border border-white/10 rounded-xl p-3 flex items-center justify-between gap-2">
+<span class="text-xs text-slate-300 truncate">{esc(user.referralCode)}', '{esc(user.referralCode)}</strong>, then sign back in to see the logged referral.
+</p>
+</div>
+
+<div class="surface-card rounded-2xl p-6 space-y-4">
+<div class="flex items-center justify-between">
+<h2 class="text-lg font-extrabold text-white">Invited Friends ({fmtMoney(1.00)} Demo Bonus / Invite</span>
+</div>
+latex
+{refs.length === 0 ? ` &lt;div class="text-center py-10 border border-dashed border-white/10 rounded-xl text-sm text-slate-400"&gt; No invited friends logged yet. &lt;/div&gt; ` : ` &lt;div class="space-y-2.5"&gt; 
+
+{refs.map(r => &lt;div class="bg-obsidian-950 border border-white/10 rounded-xl p-3.5 flex items-center justify-between"&gt; &lt;div&gt; &lt;p class="text-sm font-bold text-white"&gt;${esc(r.friendName)}</p>
+<p class="text-[11px] text-slate-500">Joined ${esc(r.createdAt)}&lt;/p&gt; &lt;/div&gt; &lt;span class="text-[11px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-full"&gt;${esc(r.status)}</span>
+</div>
+).join('')} &lt;/div&gt;}
+</div>
+</div>
+</div>
+`;
+},
+
+settings() {
+const user = Store.getSession();
+
+return `
+<div class="space-y-8">
+<div>
+<span class="text-xs font-bold uppercase tracking-widest text-gold-400">Account & Architecture</span>
+<h1 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">Profile, Settings & Integration Status</h1>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Profile & Payout Settings -->
+<div class="lg:col-span-6 surface-card rounded-2xl p-6 space-y-4">
+<h2 class="text-lg font-extrabold text-white">User Profile & Payout Preferences</h2>
+${!user ?
+<p class="text-sm text-slate-400">Sign in to customize your profile, country, currency, and saved CBE / international payout details.</p>
+<button onclick="App.demoLogin()" class="gold-gradient text-obsidian-950 font-bold px-5 py-2.5 rounded-xl text-sm">Demo Login</button>
+:
+<form onsubmit="App.handleSaveProfile(event)" class="space-y-3.5">
+<div>
+<label class="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
+<input id="prof-name" required value="{CONFIG.COUNTRIES.map(c => <option value="${esc(c)}" ${user.country === c ? 'selected' : ''}&gt;${esc(c)}</option>).join('')} &lt;/select&gt; &lt;/div&gt; &lt;div&gt; &lt;label class="block text-xs font-semibold text-slate-300 mb-1"&gt;Preferred Currency&lt;/label&gt; &lt;select id="prof-curr" class="w-full bg-obsidian-900 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white"&gt;${Object.keys(CONFIG.CURRENCIES).map(c => <option value="${c}" ${user.currency === c ? 'selected' : ''}&gt;${c}</option>).join('')} &lt;/select&gt; &lt;/div&gt; &lt;/div&gt; &lt;div&gt; &lt;label class="block text-xs font-semibold text-slate-300 mb-1"&gt;Default Withdrawal Method&lt;/label&gt; &lt;select id="prof-method" class="w-full bg-obsidian-900 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white"&gt;${CONFIG.PAYOUT_METHODS.map(m => <option value="${m.id}" ${user.preferredMethod === m.id ? 'selected' : ''}&gt;${esc(m.name)}</option>).join('')} &lt;/select&gt; &lt;/div&gt; &lt;div&gt; &lt;label class="block text-xs font-semibold text-slate-300 mb-1"&gt;Saved Payout Account / CBE Number / Email&lt;/label&gt; &lt;input id="prof-account" value="${esc(user.payoutAccount || '')}" placeholder="e.g., 1000XXXXXXXXX (CBE) or PayPal email" class="w-full bg-obsidian-900 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white" />
+</div>
+<label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer pt-1">
+<input id="prof-notify" type="checkbox" ${user.notifyEmail ? 'checked' : ''} class="rounded" /&gt; Receive email updates on payout & task verification (when backend is active) &lt;/label&gt; &lt;div class="flex flex-wrap gap-3 pt-2"&gt; &lt;button type="submit" class="gold-gradient text-obsidian-950 font-bold px-5 py-2.5 rounded-xl text-sm"&gt;Save Settings&lt;/button&gt; &lt;button type="button" onclick="App.handleResetDemo()" class="bg-obsidian-800 hover:bg-obsidian-700 border border-white/15 text-slate-300 font-semibold px-4 py-2.5 rounded-xl text-xs"&gt;Reset Local Demo Data&lt;/button&gt; &lt;/div&gt; &lt;/form&gt;}
+</div>
+
+<!-- Honest Production Readiness / Required Integrations -->
+<div class="lg:col-span-6 surface-card rounded-2xl p-6 space-y-4">
+<h2 class="text-lg font-extrabold text-white">Production Integration Checklist</h2>
+<p class="text-xs text-slate-400 leading-relaxed">
+Earnova never simulates fake successful cashouts. Below is the exact status of what works locally vs. what requires external services before live launch:
+</p>
+<div class="space-y-2.5 text-xs">
+<div class="bg-obsidian-950 border border-emerald-500/30 rounded-xl p-3.5">
+<div class="flex justify-between font-bold text-emerald-400"><span>✓ UI, Navigation & Mini-Game Engine</span><span>Functional</span></div>
+<p class="text-slate-400 mt-1">All screens, responsive layouts, multi-currency conversion, and Gold Vault Reflex work in-browser.</p>
+</div>
+<div class="bg-obsidian-950 border border-gold-500/30 rounded-xl p-3.5">
+<div class="flex justify-between font-bold text-gold-400"><span>⚠ Backend API & Database</span><span>Required</span></div>
+<p class="text-slate-400 mt-1">Needed for real user auth, server-side balance ledger, task proof moderation, and anti-fraud referral checks.</p>
+</div>
+<div class="bg-obsidian-950 border border-gold-500/30 rounded-xl p-3.5">
+<div class="flex justify-between font-bold text-gold-400"><span>⚠ Rewarded Ad Networks & Game SDKs</span><span>Required</span></div>
+<p class="text-slate-400 mt-1">Integrate Google AdMob, Unity Ads, or AppLovin MAX + Offerwall SDKs with S2S reward callbacks.</p>
+</div>
+<div class="bg-obsidian-950 border border-gold-500/30 rounded-xl p-3.5">
+<div class="flex justify-between font-bold text-gold-400"><span>⚠ CBE, CBE Birr & International Payout APIs</span><span>Required</span></div>
+<p class="text-slate-400 mt-1">Connect licensed payout processors (CBE/Chapa/ArifPay for Ethiopia + Stripe/Wise/PayPal Payouts globally) and KYC verification.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+`;
+}
+},
+
+/**
+* SHARED RENDER HELPERS
+*/
+renderTxRow(tx) {
+const isWithdraw = tx && tx.type === 'withdrawal';
+const icons = { task: '✅', game: '🎮', ad: '📺', referral: '🤝', withdrawal: '💸' };
+const amount = Math.abs(safeNumber(tx && tx.amountUsd, 0));
+return &lt;div class="bg-obsidian-950 border border-white/10 rounded-xl p-3.5 flex items-center justify-between gap-3"&gt; &lt;div class="flex items-center gap-3 min-w-0"&gt; &lt;div class="w-9 h-9 rounded-lg bg-obsidian-800 flex items-center justify-center text-base shrink-0"&gt;${icons[tx && tx.type] || '•'}</div>
+<div class="min-w-0">
+<p class="text-sm font-semibold text-white truncate">{esc((tx && tx.note) || '')} • {isWithdraw ? 'text-amber-300' : 'gold-text'}">
+{fmtMoney(amount)}
+</p>
+<span class="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
+${isWithdraw ? 'Pending (Not Paid)' : 'Pending Verification'} &lt;/span&gt; &lt;/div&gt; &lt;/div&gt;;
+},
+
+/**
+* TASK HANDLERS
+*/
+setTaskFilter(cat) {
+this.state.taskFilter = cat;
+this.renderView();
+},
+
+openTaskModal(taskId) {
+const task = CONFIG.MICROTASKS.find(t => t.id === taskId);
+if (!task) return;
+this.openModal(&lt;div class="p-6 border-b border-white/10 bg-obsidian-900 flex items-center justify-between"&gt; &lt;div&gt; &lt;span class="text-[11px] font-bold text-gold-400 uppercase"&gt;${esc(task.category)}</span>
+<h3 class="text-lg font-extrabold text-white mt-0.5">{task.id}')" class="p-6 space-y-4">
+<p class="text-xs text-slate-300 bg-obsidian-950 border border-white/10 p-3.5 rounded-xl leading-relaxed">{fmtMoney(task.demoRewardUsd)}</strong></span>
+<span>Status: Pending Verification</span>
+</div>
+<button type="submit" class="w-full gold-gradient text-obsidian-950 font-bold py-2.5 rounded-xl text-sm">Submit Task</button>
+</form>
+`);
+},
+
+handleSubmitTask(e, taskId) {
+e.preventDefault();
+const user = Store.getSession();
+const task = CONFIG.MICROTASKS.find(t => t.id === taskId);
+if (!user || !task) return;
+Store.markTaskDone(user.id, taskId);
+Store.addTransaction({
+id: 'tx-' + Date.now(),
+userId: user.id,
+type: 'task',
+title: Microtask: ${task.title}, amountUsd: safeNumber(task.demoRewardUsd, 0), status: 'pending_verification', note: 'Demo submission — awaits backend review', createdAt: new Date().toLocaleString() }); this.closeModal(); this.toast(Submitted! +${fmtMoney(task.demoRewardUsd)} added to Pending Demo Balance., 'success');
+this.renderNavigation();
+this.renderView();
+},
+
+/**
+* MINI-GAME HANDLERS (Gold Vault Reflex)
+*/
+startMiniGame() {
+this.clearActiveTimers();
+this.state.game = {
+active: true,
+score: 0,
+timeLeft: 15,
+targetPos: Math.floor(Math.random() * 9),
+intervalId: setInterval(() => {
+this.state.game.timeLeft -= 1;
+const timerEl = document.getElementById('game-timer');
+if (timerEl) timerEl.textContent = ${Math.max(0, this.state.game.timeLeft)}s`;
+if (this.state.game.timeLeft <= 0) this.finishMiniGame();
+}, 1000)
+};
+this.renderView();
+},
+
+hitGameTile(idx) {
+const g = this.state.game;
+if (!g.active || idx !== g.targetPos) return;
+g.score += 1;
+let next = Math.floor(Math.random() * 9);
+if (next === g.targetPos) next = (next + 1) % 9;
+g.targetPos = next;
+this.renderView();
+},
+
+finishMiniGame() {
+const score = safeNumber(this.state.game.score, 0);
+this.clearActiveTimers();
+this.state.game.timeLeft = 15;
+const user = Store.getSession();
+if (score >= 8 && user) {
+Store.addTransaction({
+id: 'tx-' + Date.now(),
+userId: user.id,
+type: 'game',
+title: Game: Gold Vault Reflex (${score} hits), amountUsd: 0.20, status: 'pending_verification', note: 'Prototype game reward — requires anti-cheat backend', createdAt: new Date().toLocaleString() }); this.toast(Great reflex ({fmtMoney(0.20)} logged as Pending Verification., 'success'); } else { this.toast(Time up! Score: ${score}. Reach 8+ hits to log the demo reward., 'warning');
+}
+this.renderNavigation();
+this.renderView();
+},
+
+/**
+* SIMULATED AD PLAYER
+*/
+openAdPlayer(adId) {
+const ad = CONFIG.AD_CAMPAIGNS.find(a => a.id === adId);
+if (!ad) return;
+this.clearActiveTimers();
+this.state.adTimer = { active: true, remaining: ad.durationSec, total: ad.durationSec, ad, intervalId: null };
+
+this.openModal(&lt;div class="p-5 bg-obsidian-900 border-b border-white/10 flex items-center justify-between"&gt; &lt;span class="text-xs font-bold text-gold-400 uppercase tracking-wider"&gt;Simulated Ad Network Player&lt;/span&gt; &lt;button onclick="App.closeModal()" class="text-xs text-slate-400 hover:text-white"&gt;Close (Forfeit)&lt;/button&gt; &lt;/div&gt; &lt;div class="p-6 text-center space-y-5"&gt; &lt;div class="h-44 rounded-2xl bg-obsidian-950 border border-gold-500/30 flex flex-col items-center justify-center p-4"&gt; &lt;span class="text-4xl mb-2"&gt;📺&lt;/span&gt; &lt;p class="text-xs text-gold-400 font-semibold"&gt;${esc(ad.sponsor)}</p>
+<h3 class="text-lg font-extrabold text-white mt-1">{ad.durationSec}s</span>
+</div>
+<div class="w-full h-2.5 bg-obsidian-950 rounded-full overflow-hidden border border-white/10">
+<div id="ad-progress" class="h-full gold-gradient transition-all duration-1000" style="width: 0%"></div>
+</div>
+</div>
+<button id="ad-claim-btn" disabled onclick="App.claimAdReward()"
+class="w-full py-3 rounded-xl font-bold text-sm bg-obsidian-800 text-slate-500 cursor-not-allowed">
+Wait for timer to complete...
+</button>
+</div>
+`);
+
+this.state.adTimer.intervalId = setInterval(() => {
+const t = this.state.adTimer;
+t.remaining -= 1;
+const pct = Math.min(100, Math.max(0, Math.round(((t.total - t.remaining) / t.total) * 100)));
+const cd = document.getElementById('ad-countdown');
+const bar = document.getElementById('ad-progress');
+if (cd) cd.textContent = ${Math.max(0, t.remaining)}s; if (bar) bar.style.width = ``${pct}%;
+
+if (t.remaining <= 0) {
+clearInterval(t.intervalId);
+t.intervalId = null;
+const st = document.getElementById('ad-status-text');
+const btn = document.getElementById('ad-claim-btn');
+if (st) st.textContent = 'Ad view complete! Ready to log demo reward.';
+if (btn) {
+btn.disabled = false;
+btn.className = 'w-full py-3 rounded-xl font-bold text-sm gold-gradient text-obsidian-950 shadow cursor-pointer';
+btn.textContent = Claim +${fmtMoney(ad.demoRewardUsd)} (Pending Verification)`;
+}
+}
+}, 1000);
+},
+
+claimAdReward() {
+const user = Store.getSession();
+const ad = this.state.adTimer.ad;
+if (!user || !ad) return;
+Store.addTransaction({
+id: 'tx-' + Date.now(),
+userId: user.id,
+type: 'ad',
+title: Ad View:${ad.sponsor}, amountUsd: safeNumber(ad.demoRewardUsd, 0), status: 'pending_verification', note: 'Simulated ad — requires real ad network S2S callback', createdAt: new Date().toLocaleString() }); this.closeModal(); this.toast(Logged +${fmtMoney(ad.demoRewardUsd)} to Pending Demo Balance., 'success');
+this.renderNavigation();
+this.renderView();
+},
+
+/**
+* WALLET & WITHDRAWALS
+*/
+selectWithdrawMethod(id) {
+this.state.selectedWithdrawMethod = CONFIG.PAYOUT_METHODS.some(m => m.id === id) ? id : 'cbe_bank';
+this.renderView();
+},
+
+setWalletFilter(f) {
+this.state.walletFilter = f;
+this.renderView();
+},
+
+handleWithdraw(e) {
+e.preventDefault();
+const user = Store.getSession();
+if (!user) return;
+const methodId = document.getElementById('wd-method').value;
+const method = CONFIG.PAYOUT_METHODS.find(m => m.id === methodId) || CONFIG.PAYOUT_METHODS[0];
+const account = document.getElementById('wd-account').value.trim();
+const amountUsd = parseFloat(document.getElementById('wd-amount').value);
+const bal = getUserBalances(user.id);
+
+if (!Number.isFinite(amountUsd) || amountUsd <= 0) {
+this.toast('Enter a valid withdrawal amount.', 'error');
+return;
+}
+if (amountUsd > bal.availableDemoUsd) {
+this.toast(Insufficient Pending Demo Balance (${fmtMoney(bal.availableDemoUsd, 'USD')}). Complete tasks, games, or ads first to test withdrawals., 'warning'); return; } if (amountUsd &lt; method.minUsd) { this.toast(Minimum withdrawal for {fmtMoney(method.minUsd)}.`, 'warning');
+return;
+}
+
+Store.addTransaction({
+id: 'tx-' + Date.now(),
+userId: user.id,
+type: 'withdrawal',
+title: Withdrawal Request: ${method.name}, amountUsd: -amountUsd, status: 'pending_verification', note:To: ${account} (Prototype request — not paid),
+createdAt: new Date().toLocaleString()
+});
+e.target.reset();
+this.toast(Withdrawal request logged as Pending Verification (No real payment sent)., 'info');
+this.renderNavigation();
+this.renderView();
+},
+
+/**
+* REFERRALS & PROFILE
+*/
+copyText(text, msg) {
+if (navigator.clipboard) {
+navigator.clipboard.writeText(text).then(() => this.toast(msg, 'success')).catch(() => this.toast('Copy: ' + text, 'info'));
+} else {
+this.toast('Code: ' + text, 'info');
+}
+},
+
+shareInvite(code, url) {
+if (navigator.share) {
+navigator.share({ title: 'Join Earnova', text: Sign up on Earnova using my code ${code}, url }).catch(() => {});
+} else {
+this.copyText(url, 'Referral link copied to clipboard!');
+}
+},
+
+handleSaveProfile(e) {
+e.preventDefault();
+const user = Store.getSession();
+if (!user) return;
+const chosenCurrency = document.getElementById('prof-curr').value;
+const validCurrency = CONFIG.CURRENCIES[chosenCurrency] ? chosenCurrency : 'USD';
+const updated = {
+...user,
+name: document.getElementById('prof-name').value.trim(),
+country: document.getElementById('prof-country').value,
+currency: validCurrency,
+preferredMethod: document.getElementById('prof-method').value,
+payoutAccount: document.getElementById('prof-account').value.trim(),
+notifyEmail: document.getElementById('prof-notify').checked
+};
+Store.setSession(updated);
+Store.saveUsers(Store.getUsers().map(u => u.id === updated.id ? updated : u));
+this.syncSessionPreferences(updated);
+this.toast('Profile and payout preferences saved.', 'success');
+this.renderNavigation();
+this.renderView();
+},
+
+handleResetDemo() {
+if (!confirm('Reset all local transactions, completed tasks, and referrals?')) return;
+Store.resetAll();
+this.toast('Local prototype data reset.', 'info');
+this.renderNavigation();
+this.renderView();
+}
+};
+
+window.addEventListener('DOMContentLoaded', () => App.init());
+</script>
+</body>
+</html>
